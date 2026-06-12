@@ -1,0 +1,176 @@
+/* ---------- GLOBAL ---------- */
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    overflow: hidden;
+    font-family: Arial, Helvetica, sans-serif;
+    background: #000;
+}
+
+/* ---------- CANVAS ---------- */
+
+#riverCanvas {
+    position: fixed;
+    inset: 0;
+    width: 100vw;
+    height: 100vh;
+    display: block;
+    background: #000;
+}
+
+/* ---------- UI PANEL ---------- */
+
+#ui {
+    position: fixed;
+    top: 15px;
+    left: 15px;
+
+    width: 280px;
+
+    padding: 16px;
+
+    background: rgba(255, 255, 255, 0.92);
+
+    border-radius: 12px;
+
+    box-shadow:
+        0 4px 20px rgba(0,0,0,0.25);
+
+    z-index: 10;
+}
+
+/* ---------- TITLE ---------- */
+
+#ui h2 {
+    margin-bottom: 15px;
+    font-size: 22px;
+}
+
+/* ---------- CONTROLS ---------- */
+
+.control-group {
+    margin-bottom: 14px;
+}
+
+.control-group label {
+    display: block;
+    margin-bottom: 5px;
+    font-size: 14px;
+    font-weight: bold;
+}
+
+.control-group input[type="number"] {
+    width: 100%;
+    padding: 8px;
+
+    border: 1px solid #bbb;
+    border-radius: 6px;
+
+    font-size: 14px;
+}
+
+.control-group input[type="range"] {
+    width: 100%;
+}
+
+/* ---------- BUTTONS ---------- */
+
+.buttons {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+
+    margin-top: 10px;
+}
+
+button {
+    flex: 1;
+
+    min-width: 80px;
+
+    padding: 10px;
+
+    border: none;
+    border-radius: 8px;
+
+    cursor: pointer;
+
+    font-size: 14px;
+    font-weight: bold;
+
+    transition:
+        transform 0.15s ease,
+        opacity 0.15s ease;
+}
+
+button:hover {
+    transform: translateY(-2px);
+}
+
+button:active {
+    transform: translateY(0px);
+}
+
+#generateBtn {
+    background: #3f7cff;
+    color: white;
+}
+
+#pauseBtn {
+    background: #ffb300;
+    color: black;
+}
+
+#exportBtn {
+    background: #2ecc71;
+    color: white;
+}
+
+/* ---------- STATS ---------- */
+
+#stats {
+    margin-top: 12px;
+}
+
+#stats p {
+    margin-bottom: 8px;
+    font-size: 14px;
+}
+
+#stats span {
+    font-weight: bold;
+}
+
+/* ---------- DIVIDER ---------- */
+
+hr {
+    margin-top: 14px;
+    margin-bottom: 14px;
+
+    border: none;
+    border-top: 1px solid #ddd;
+}
+
+/* ---------- MOBILE ---------- */
+
+@media (max-width: 700px) {
+
+    #ui {
+        width: 240px;
+        padding: 12px;
+    }
+
+    #ui h2 {
+        font-size: 18px;
+    }
+
+    button {
+        font-size: 13px;
+    }
+
+}
