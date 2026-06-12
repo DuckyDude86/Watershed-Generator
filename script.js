@@ -9,48 +9,94 @@ function resize() {
 resize();
 window.addEventListener("resize", resize);
 
-let streams = [];
+// height field
+const gridSize = 6;
+let terrain = [];
 
-class Stream {
-    constructor(x, y) {
-        this.points = [{ x, y }];
+function generateTerrain() {
+    terrain = [];
+
+    for (let x = 0; x < w; x += gridSize) {
+        let col = [];
+        for (let y = 0; y < h; y += gridSize) {
+            // smooth noise-like field
+            const v = Math.sin(x * 0.01) + Math.cos(y * 0.01) + Math.random() * 0.3;
+            col.push(v);
+        }
+        terrain.push(col);
+    }
+}
+
+function getHeight(x, y) {
+    const gx = Math.floor(x / gridSize);
+    const gy = Math.floor(y / gridSize);
+
+    if (!terrain[gx] || terrain[gx][gy] === undefined) return 999;
+
+    return terrain[gx][gy];
+}
+
+// water particle
+class Particle {
+    constructor() {
+        this.x = Math.random() * w;
+        this.y = 0;
+        this.path = [];
     }
 
     step() {
-        const last = this.points[this.points.length - 1];
+        let bestX = this.x;
+        let bestY = this.y;
+        let bestH = getHeight(this.x, this.y);
 
-        // downward bias (THIS IS THE KEY FIX)
-        const angle = (Math.random() - 0.5) * 1.2;
+        // check neighbors (downhill search)
+        const dirs = [
+            [0, 4],
+            [-3, 4],
+            [3, 4],
+            [0, -2]
+        ];
 
-        const dx = Math.sin(angle) * 20;
-        const dy = 12 + Math.random() * 10;
+        for (const [dx, dy] of dirs) {
+            const nx = this.x + dx;
+            const ny = this.y + dy;
 
-        const nx = last.x + dx;
-        const ny = last.y + dy;
+            const h = getHeight(nx, ny);
+            if (h < bestH) {
+                bestH = h;
+                bestX = nx;
+                bestY = ny;
+            }
+        }
 
-        this.points.push({ x: nx, y: ny });
+        this.x = bestX;
+        this.y = bestY;
+
+        this.path.push({ x: this.x, y: this.y });
     }
 
     draw() {
         ctx.beginPath();
-        ctx.moveTo(this.points[0].x, this.points[0].y);
+        ctx.moveTo(this.path[0].x, this.path[0].y);
 
-        for (const p of this.points) {
+        for (const p of this.path) {
             ctx.lineTo(p.x, p.y);
         }
 
-        ctx.strokeStyle = "rgba(120,120,255,0.8)";
-        ctx.lineWidth = 2;
+        ctx.strokeStyle = "rgba(120,120,255,0.5)";
+        ctx.lineWidth = 1;
         ctx.stroke();
     }
 }
 
-function generate() {
-    streams = [];
+let particles = [];
 
-    const count = 25; // IMPORTANT: low number
-    for (let i = 0; i < count; i++) {
-        streams.push(new Stream(Math.random() * w, 0));
+function generate() {
+    generateTerrain();
+    particles = [];
+
+    for (let i = 0; i < 40; i++) {
+        particles.push(new Particle());
     }
 }
 
@@ -58,9 +104,9 @@ function animate() {
     ctx.fillStyle = "black";
     ctx.fillRect(0, 0, w, h);
 
-    for (const s of streams) {
-        if (Math.random() < 0.8) s.step();
-        s.draw();
+    for (const p of particles) {
+        if (Math.random() < 0.9) p.step();
+        p.draw();
     }
 
     requestAnimationFrame(animate);
