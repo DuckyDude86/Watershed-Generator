@@ -1,50 +1,20 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>River Generator V3</title>
-    <link rel="stylesheet" href="style.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>River Generator Clean Build</title>
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
 <div id="ui">
-    <h2>🌊 River Generator V3</h2>
-
-    <div class="control-group">
-        <label for="cap">Max Magnitude</label>
-        <input type="number" id="cap" value="300" min="10" max="5000">
-    </div>
-
-    <div class="control-group">
-        <label for="speed">Growth Speed</label>
-        <input type="range" id="speed" min="1" max="100" value="20">
-    </div>
-
-    <div class="control-group">
-        <label for="spread">Branch Spread</label>
-        <input type="range" id="spread" min="10" max="200" value="60">
-    </div>
-
-    <div class="buttons">
-        <button id="generateBtn">Generate</button>
-        <button id="pauseBtn">Pause</button>
-        <button id="exportBtn">Export PNG</button>
-    </div>
-
-    <hr>
-
-    <div id="stats">
-        <p>Magnitude: <span id="currentMagnitude">0</span></p>
-        <p>Outlet: <span id="outletMagnitude">0</span></p>
-        <p>Branches: <span id="branchCount">0</span></p>
-        <p>Status: <span id="status">Idle</span></p>
-    </div>
+  <button id="generateBtn">Generate</button>
+  <p>Status: <span id="status">Idle</span></p>
 </div>
 
 <canvas id="riverCanvas"></canvas>
 
 <script src="script.js"></script>
-
 </body>
 </html>
