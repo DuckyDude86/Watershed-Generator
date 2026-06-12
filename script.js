@@ -7,18 +7,17 @@ function resize() {
   w = canvas.width = window.innerWidth;
   h = canvas.height = window.innerHeight;
 }
-
 resize();
 window.addEventListener("resize", resize);
 
 // ----------------------
-// PARTICLES
+// PARTICLES WITH TRAILS
 // ----------------------
 class Particle {
   constructor() {
     this.x = Math.random() * w;
     this.y = 0;
-    this.path = [{ x: this.x, y: this.y }]; // IMPORTANT: never empty
+    this.path = [{ x: this.x, y: this.y }];
   }
 
   step() {
@@ -31,23 +30,16 @@ class Particle {
     ];
 
     const last = this.path[this.path.length - 1];
-
-    let bestX = last.x;
-    let bestY = last.y;
-
-    // biased downward movement
     const choice = dirs[Math.floor(Math.random() * dirs.length)];
 
-    bestX = last.x + choice[0];
-    bestY = last.y + choice[1];
-
-    this.x = bestX + (Math.random() - 0.5) * 1.5;
-    this.y = bestY;
+    this.x = last.x + choice[0] + (Math.random() - 0.5) * 1.2;
+    this.y = last.y + choice[1];
 
     this.path.push({ x: this.x, y: this.y });
 
-    // prevent infinite memory growth
-    if (this.path.length > 200) {
+    // IMPORTANT CHANGE:
+    // keep full trails longer, only trim very lightly
+    if (this.path.length > 1200) {
       this.path.shift();
     }
   }
@@ -60,11 +52,10 @@ class Particle {
 
     for (let i = 1; i < this.path.length; i++) {
       const p = this.path[i];
-      if (!p) continue;
       ctx.lineTo(p.x, p.y);
     }
 
-    ctx.strokeStyle = "rgba(120,120,255,0.6)";
+    ctx.strokeStyle = "rgba(120,120,255,0.55)";
     ctx.lineWidth = 1.5;
     ctx.stroke();
   }
@@ -78,15 +69,19 @@ let particles = [];
 function generate() {
   particles = [];
 
-  for (let i = 0; i < 50; i++) {
+  for (let i = 0; i < 30; i++) {
     particles.push(new Particle());
   }
 
   document.getElementById("status").textContent = "Running";
 }
 
+// ----------------------
+// ANIMATION LOOP
+// ----------------------
 function animate() {
-  ctx.fillStyle = "black";
+  // IMPORTANT: semi-transparent fade instead of full clear
+  ctx.fillStyle = "rgba(0,0,0,0.25)";
   ctx.fillRect(0, 0, w, h);
 
   for (const p of particles) {
@@ -97,8 +92,6 @@ function animate() {
   requestAnimationFrame(animate);
 }
 
-// ----------------------
-// EVENTS
 // ----------------------
 document.getElementById("generateBtn").onclick = generate;
 
