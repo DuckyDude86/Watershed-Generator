@@ -2,114 +2,134 @@ const canvas = document.getElementById("riverCanvas");
 const ctx = canvas.getContext("2d");
 
 let w, h;
+
 function resize() {
-    w = canvas.width = window.innerWidth;
-    h = canvas.height = window.innerHeight;
+  w = canvas.width = window.innerWidth;
+  h = canvas.height = window.innerHeight;
 }
 resize();
 window.addEventListener("resize", resize);
 
-// height field
-const gridSize = 6;
+let particles = [];
 let terrain = [];
+const grid = 10;
 
+// ------------------------
+// TERRAIN (fake heightmap)
+// ------------------------
 function generateTerrain() {
-    terrain = [];
+  terrain = [];
 
-    for (let x = 0; x < w; x += gridSize) {
-        let col = [];
-        for (let y = 0; y < h; y += gridSize) {
-            // smooth noise-like field
-            const v = Math.sin(x * 0.01) + Math.cos(y * 0.01) + Math.random() * 0.3;
-            col.push(v);
-        }
-        terrain.push(col);
+  for (let x = 0; x < w; x += grid) {
+    const col = [];
+    for (let y = 0; y < h; y += grid) {
+      const v =
+        Math.sin(x * 0.01) +
+        Math.cos(y * 0.01) +
+        Math.random() * 0.4;
+
+      col.push(v);
     }
+    terrain.push(col);
+  }
 }
 
 function getHeight(x, y) {
-    const gx = Math.floor(x / gridSize);
-    const gy = Math.floor(y / gridSize);
+  const gx = Math.floor(x / grid);
+  const gy = Math.floor(y / grid);
 
-    if (!terrain[gx] || terrain[gx][gy] === undefined) return 999;
-
-    return terrain[gx][gy];
+  if (!terrain[gx] || terrain[gx][gy] === undefined) return 999;
+  return terrain[gx][gy];
 }
 
-// water particle
+// ------------------------
+// PARTICLES (water flow)
+// ------------------------
 class Particle {
-    constructor() {
-        this.x = Math.random() * w;
-        this.y = 0;
-        this.path = [];
+  constructor() {
+    this.x = Math.random() * w;
+    this.y = 0;
+    this.path = [];
+  }
+
+  step() {
+    const dirs = [
+      [0, 4],
+      [-3, 4],
+      [3, 4],
+      [-6, 3],
+      [6, 3]
+    ];
+
+    let bestX = this.x;
+    let bestY = this.y;
+    let bestH = getHeight(this.x, this.y);
+
+    for (const [dx, dy] of dirs) {
+      const nx = this.x + dx;
+      const ny = this.y + dy;
+
+      const h = getHeight(nx, ny);
+
+      if (h < bestH) {
+        bestH = h;
+        bestX = nx;
+        bestY = ny;
+      }
     }
 
-    step() {
-        let bestX = this.x;
-        let bestY = this.y;
-        let bestH = getHeight(this.x, this.y);
+    // small wobble so it doesn't become vertical ramen
+    this.x = bestX + (Math.random() - 0.5) * 1.2;
+    this.y = bestY;
 
-        // check neighbors (downhill search)
-        const dirs = [
-            [0, 4],
-            [-3, 4],
-            [3, 4],
-            [0, -2]
-        ];
+    this.path.push({ x: this.x, y: this.y });
 
-        for (const [dx, dy] of dirs) {
-            const nx = this.x + dx;
-            const ny = this.y + dy;
+    // stop infinite growth
+    if (this.path.length > 200) {
+      this.path.shift();
+    }
+  }
 
-            const h = getHeight(nx, ny);
-            if (h < bestH) {
-                bestH = h;
-                bestX = nx;
-                bestY = ny;
-            }
-        }
+  draw() {
+    if (this.path.length < 2) return;
 
-        this.x = bestX;
-        this.y = bestY;
+    ctx.beginPath();
+    ctx.moveTo(this.path[0].x, this.path[0].y);
 
-        this.path.push({ x: this.x, y: this.y });
+    for (const p of this.path) {
+      ctx.lineTo(p.x, p.y);
     }
 
-    draw() {
-        ctx.beginPath();
-        ctx.moveTo(this.path[0].x, this.path[0].y);
-
-        for (const p of this.path) {
-            ctx.lineTo(p.x, p.y);
-        }
-
-        ctx.strokeStyle = "rgba(120,120,255,0.5)";
-        ctx.lineWidth = 1;
-        ctx.stroke();
-    }
+    ctx.strokeStyle = "rgba(120,120,255,0.6)";
+    ctx.lineWidth = 1.5;
+    ctx.stroke();
+  }
 }
 
-let particles = [];
-
+// ------------------------
+// MAIN CONTROL
+// ------------------------
 function generate() {
-    generateTerrain();
-    particles = [];
+  particles = [];
+  generateTerrain();
 
-    for (let i = 0; i < 40; i++) {
-        particles.push(new Particle());
-    }
+  for (let i = 0; i < 40; i++) {
+    particles.push(new Particle());
+  }
+
+  document.getElementById("status").textContent = "Running";
 }
 
 function animate() {
-    ctx.fillStyle = "black";
-    ctx.fillRect(0, 0, w, h);
+  ctx.fillStyle = "black";
+  ctx.fillRect(0, 0, w, h);
 
-    for (const p of particles) {
-        if (Math.random() < 0.9) p.step();
-        p.draw();
-    }
+  for (const p of particles) {
+    p.step();
+    p.draw();
+  }
 
-    requestAnimationFrame(animate);
+  requestAnimationFrame(animate);
 }
 
 document.getElementById("generateBtn").onclick = generate;
